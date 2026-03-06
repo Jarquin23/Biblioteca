@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block title %}Devolver Préstamo{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h4><i class="fas fa-undo-alt"></i> Registrar Devolución</h4>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <p><strong>Lector:</strong> {{ prestamo.lector.nombre_completo }}</p>
+                    <p><strong>Libro:</strong> {{ prestamo.libro.titulo }}</p>
+                    <p><strong>Fecha préstamo:</strong> {{ prestamo.fecha_prestamo|date:"d/m/Y" }}</p>
+                    <p><strong>Fecha límite:</strong> {{ prestamo.fecha_limite|date:"d/m/Y" }}</p>
+                    <p><strong>Días de retraso:</strong> 
+                        {% if prestamo.dias_restantes < 0 %}
+                            <span class="text-danger">{{ prestamo.dias_restantes|stringformat:"+d" }} días</span>
+                        {% else %}
+                            <span class="text-success">En plazo</span>
+                        {% endif %}
+                    </p>
+                </div>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label class="form-label">{{ form.observaciones.label }}</label>
+                        {{ form.observaciones }}
+                        <div class="form-text">Opcional: Añade alguna observación sobre la devolución.</div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'lista_prestamos' %}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-check"></i> Confirmar Devolución
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

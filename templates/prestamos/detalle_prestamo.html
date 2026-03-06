@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+
+{% block title %}Detalle del Préstamo{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h4><i class="fas fa-info-circle"></i> Detalle del Préstamo</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5 class="border-bottom pb-2">Información del Lector</h5>
+                        <p><strong>Nombre:</strong> {{ prestamo.lector.nombre_completo }}</p>
+                        <p><strong>Documento:</strong> {{ prestamo.lector.get_tipo_documento_display }} - {{ prestamo.lector.numero_documento }}</p>
+                        <p><strong>Teléfono:</strong> {{ prestamo.lector.telefono }}</p>
+                        <p><strong>Email:</strong> {{ prestamo.lector.email|default:"-" }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h5 class="border-bottom pb-2">Información del Libro</h5>
+                        <p><strong>Título:</strong> {{ prestamo.libro.titulo }}</p>
+                        <p><strong>ISBN:</strong> {{ prestamo.libro.isbn }}</p>
+                        <p><strong>Autores:</strong> {{ prestamo.libro.autores_lista|truncatechars:50 }}</p>
+                        <p><strong>Categoría:</strong> {{ prestamo.libro.categoria|default:"-" }}</p>
+                    </div>
+                </div>
+                
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <h5 class="border-bottom pb-2">Información del Préstamo</h5>
+                    </div>
+                    <div class="col-md-4">
+                        <p><strong>Fecha préstamo:</strong> {{ prestamo.fecha_prestamo|date:"d/m/Y" }}</p>
+                    </div>
+                    <div class="col-md-4">
+                        <p><strong>Fecha límite:</strong> {{ prestamo.fecha_limite|date:"d/m/Y" }}</p>
+                    </div>
+                    <div class="col-md-4">
+                        <p><strong>Fecha devolución:</strong> {{ prestamo.fecha_devolucion|date:"d/m/Y"|default:"-" }}</p>
+                    </div>
+                    <div class="col-md-4">
+                        <p><strong>Estado:</strong> 
+                            <span class="badge 
+                                {% if prestamo.estado == 'activo' %}bg-warning
+                                {% elif prestamo.estado == 'devuelto' %}bg-success
+                                {% elif prestamo.estado == 'vencido' %}bg-danger
+                                {% else %}bg-secondary{% endif %}">
+                                {{ prestamo.get_estado_display }}
+                            </span>
+                        </p>
+                    </div>
+                    <div class="col-md-4">
+                        <p><strong>Registrado por:</strong> {{ prestamo.usuario_registro.username|default:"Sistema" }}</p>
+                    </div>
+                    <div class="col-md-4">
+                        <p><strong>Días restantes:</strong> 
+                            {% if prestamo.estado == 'activo' %}
+                                {% if prestamo.dias_restantes < 0 %}
+                                    <span class="text-danger">{{ prestamo.dias_restantes }} días (vencido)</span>
+                                {% else %}
+                                    <span class="text-success">{{ prestamo.dias_restantes }} días</span>
+                                {% endif %}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+                
+                {% if prestamo.observaciones %}
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <h5 class="border-bottom pb-2">Observaciones</h5>
+                        <p class="border p-3">{{ prestamo.observaciones|linebreaks }}</p>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <div class="d-flex justify-content-between mt-4">
+                    <a href="{% url 'lista_prestamos' %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Volver
+                    </a>
+                    <div>
+                        {% if prestamo.estado == 'activo' and user.perfil.rol == 'bibliotecario' %}
+                        <a href="{% url 'devolver_prestamo' prestamo.pk %}" class="btn btn-success">
+                            <i class="fas fa-undo-alt"></i> Registrar Devolución
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

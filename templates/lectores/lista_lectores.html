@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+
+{% block title %}Lectores{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-users"></i> Lectores</h2>
+    {% if user.perfil.rol == 'bibliotecario' or user.perfil.rol == 'admin' %}
+    <a href="{% url 'crear_lector' %}" class="btn btn-primary">
+        <i class="fas fa-user-plus"></i> Nuevo Lector
+    </a>
+    {% endif %}
+</div>
+
+<!-- Búsqueda -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-9">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                    <input type="text" name="q" class="form-control" placeholder="Buscar por nombre, documento o email..." value="{{ query }}">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <select name="activo" class="form-select">
+                    <option value="">Todos</option>
+                    <option value="true" {% if activo_seleccionado == 'true' %}selected{% endif %}>Activos</option>
+                    <option value="false" {% if activo_seleccionado == 'false' %}selected{% endif %}>Inactivos</option>
+                </select>
+            </div>
+            <div class="col-md-1">
+                <button type="submit" class="btn btn-primary w-100">Filtrar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Tabla de lectores -->
+<div class="table-responsive">
+    <table class="table table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>Nombre</th>
+                <th>Documento</th>
+                <th>Email</th>
+                <th>Teléfono</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for lector in lectores %}
+            <tr>
+                <td>{{ lector.apellidos }}, {{ lector.nombre }}</td>
+                <td>{{ lector.get_tipo_documento_display }}: {{ lector.numero_documento }}</td>
+                <td>{{ lector.email|default:"-" }}</td>
+                <td>{{ lector.telefono }}</td>
+                <td>
+                    {% if lector.activo %}
+                    <span class="badge bg-success">Activo</span>
+                    {% else %}
+                    <span class="badge bg-danger">Inactivo</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <div class="btn-group btn-group-sm">
+                        <a href="{% url 'detalle_lector' lector.pk %}" class="btn btn-info" title="Ver detalles">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                        {% if user.perfil.rol == 'bibliotecario' or user.perfil.rol == 'admin' %}
+                        <a href="{% url 'editar_lector' lector.pk %}" class="btn btn-warning" title="Editar">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <a href="{% url 'toggle_lector' lector.pk %}" class="btn btn-secondary" title="{% if lector.activo %}Desactivar{% else %}Activar{% endif %}">
+                            <i class="fas {% if lector.activo %}fa-user-slash{% else %}fa-user-check{% endif %}"></i>
+                        </a>
+                        <a href="{% url 'eliminar_lector' lector.pk %}" class="btn btn-danger" title="Eliminar">
+                            <i class="fas fa-trash"></i>
+                        </a>
+                        {% endif %}
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" class="text-center">No se encontraron lectores.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

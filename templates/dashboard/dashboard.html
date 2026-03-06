@@ -1,0 +1,248 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-chart-line"></i> Dashboard</h1>
+    <div>
+        <span class="badge bg-primary p-2">
+            <i class="fas fa-calendar"></i> {% now "d/m/Y" %}
+        </span>
+    </div>
+</div>
+
+<!-- Tarjetas de resumen -->
+<div class="row mb-4">
+    <div class="col-md-3 mb-3">
+        <div class="card text-white bg-primary h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title">Total Libros</h6>
+                        <h2 class="mb-0">{{ total_libros|default:"0" }}</h2>
+                    </div>
+                    <i class="fas fa-book fa-3x opacity-50"></i>
+                </div>
+            </div>
+            <div class="card-footer bg-primary border-0">
+                <small>Disponibles: {{ libros_disponibles|default:"0" }} | Prestados: {{ libros_prestados|default:"0" }}</small>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-3">
+        <div class="card text-white bg-success h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title">Total Lectores</h6>
+                        <h2 class="mb-0">{{ total_lectores|default:"0" }}</h2>
+                    </div>
+                    <i class="fas fa-users fa-3x opacity-50"></i>
+                </div>
+            </div>
+            <div class="card-footer bg-success border-0">
+                <small>Activos: {{ lectores_activos|default:"0" }}</small>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-3">
+        <div class="card text-white bg-warning h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title">Préstamos Activos</h6>
+                        <h2 class="mb-0">{{ prestamos_activos|default:"0" }}</h2>
+                    </div>
+                    <i class="fas fa-hand-holding-heart fa-3x opacity-50"></i>
+                </div>
+            </div>
+            <div class="card-footer bg-warning border-0">
+                <small>Hoy: {{ prestamos_hoy|default:"0" }}</small>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-3">
+        <div class="card text-white bg-danger h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title">Vencidos</h6>
+                        <h2 class="mb-0">{{ prestamos_vencidos|default:"0" }}</h2>
+                    </div>
+                    <i class="fas fa-exclamation-triangle fa-3x opacity-50"></i>
+                </div>
+            </div>
+            <div class="card-footer bg-danger border-0">
+                <small>Próximos a vencer: {{ proximos_vencer|default:"0" }}</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Segunda fila de tarjetas -->
+<div class="row mb-4">
+    <div class="col-md-4 mb-3">
+        <div class="card bg-info text-white h-100">
+            <div class="card-body">
+                <h5 class="card-title">Libros por Estado</h5>
+                <ul class="list-group list-group-flush bg-transparent">
+                    <li class="list-group-item bg-transparent text-white d-flex justify-content-between">
+                        Disponibles <span class="badge bg-light text-dark">{{ libros_disponibles|default:"0" }}</span>
+                    </li>
+                    <li class="list-group-item bg-transparent text-white d-flex justify-content-between">
+                        Prestados <span class="badge bg-light text-dark">{{ libros_prestados|default:"0" }}</span>
+                    </li>
+                    <li class="list-group-item bg-transparent text-white d-flex justify-content-between">
+                        En reparación <span class="badge bg-light text-dark">{{ libros_en_reparacion|default:"0" }}</span>
+                    </li>
+                    <li class="list-group-item bg-transparent text-white d-flex justify-content-between">
+                        Perdidos <span class="badge bg-light text-dark">{{ libros_perdidos|default:"0" }}</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-3">
+        <div class="card" style="background-color: #6f42c1; color: white;">
+            <div class="card-body">
+                <h5 class="card-title">Últimos Préstamos</h5>
+                <div class="table-responsive">
+                    <table class="table table-sm table-dark">
+                        <thead>
+                            <tr>
+                                <th>Lector</th>
+                                <th>Libro</th>
+                                <th>Fecha</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for prestamo in ultimos_prestamos|slice:":5" %}
+                            <tr>
+                                <td>{{ prestamo.lector.nombre|default:""|truncatechars:15 }}</td>
+                                <td>{{ prestamo.libro.titulo|default:""|truncatechars:15 }}</td>
+                                <td>{{ prestamo.fecha_prestamo|date:"d/m/Y"|default:"" }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="3" class="text-center">No hay préstamos</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-3">
+        <div class="card" style="background-color: #20c997; color: white;">
+            <div class="card-body">
+                <h5 class="card-title">Acciones Rápidas</h5>
+                <div class="d-grid gap-2">
+                    <a href="{% url 'crear_prestamo' %}" class="btn btn-light">
+                        <i class="fas fa-plus-circle"></i> Nuevo Préstamo
+                    </a>
+                    <a href="{% url 'crear_libro' %}" class="btn btn-light">
+                        <i class="fas fa-book"></i> Registrar Libro
+                    </a>
+                    <a href="{% url 'crear_lector' %}" class="btn btn-light">
+                        <i class="fas fa-user-plus"></i> Registrar Lector
+                    </a>
+                    <a href="{% url 'prestamos_vencidos' %}" class="btn btn-warning">
+                        <i class="fas fa-exclamation"></i> Ver Vencidos
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Últimos registros -->
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0"><i class="fas fa-users"></i> Últimos Lectores Registrados</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Documento</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for lector in lectores_recientes|slice:":5" %}
+                            <tr>
+                                <td>{{ lector.nombre }} {{ lector.apellidos|default:"" }}</td>
+                                <td>{{ lector.numero_documento|default:"" }}</td>
+                                <td>
+                                    {% if lector.activo %}
+                                    <span class="badge bg-success">Activo</span>
+                                    {% else %}
+                                    <span class="badge bg-danger">Inactivo</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="3" class="text-center">No hay lectores</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0"><i class="fas fa-book"></i> Últimos Libros Registrados</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover">
+                        <thead>
+                            <tr>
+                                <th>Título</th>
+                                <th>ISBN</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for libro in libros_recientes|slice:":5" %}
+                            <tr>
+                                <td>{{ libro.titulo|default:""|truncatechars:30 }}</td>
+                                <td>{{ libro.isbn|default:"" }}</td>
+                                <td>
+                                    <span class="badge 
+                                        {% if libro.estado == 'disponible' %}bg-success
+                                        {% elif libro.estado == 'prestado' %}bg-warning
+                                        {% else %}bg-secondary{% endif %}">
+                                        {{ libro.get_estado_display|default:libro.estado }}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="3" class="text-center">No hay libros</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
